@@ -11,7 +11,7 @@ ho scaricato più o meno la qualsiasi qua dentro, è tipo un docker dei poveri m
     - fira sans (quello default del template `typslides`)
     - jetbrains mono (per stile)
     - comic sans (per ridere)
-  - il file eseguibile per runnare `typst` (`assets > tools > typst` (per linux), `assets > tools > typst.exe` (per windows))
+  - il file eseguibile per runnare `typst` (`assets > tools > typst` (per linux), `assets > tools > typst.exe` (per windows))  
     gli eseguibili di typst dal github sono tutti compilati staticamente quindi l'eseguibile da solo basta e avanza.
   - il file eseguibile dell'interpreter per runnare lo script di setup/lancio
 - license di qualsiasi cosa
