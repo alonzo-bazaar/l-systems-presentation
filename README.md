@@ -1,137 +1,58 @@
-<p align="center">
-    <img src="img/logo.png" alt="Typslides logo" width="400"/>
-</p>
+# presentazione l-systems
+presentazione l-systems
 
-<p align="center">
-    <img src="https://img.shields.io/badge/license-GPLv3-blue" alt="GPLv3 license">
-    <img src="https://badgen.net/github/contributors/manjavacas/typslides" alt="List of contributors">
-    <img src="https://badgen.net/github/release/manjavacas/typslides" alt="Current release">
-    <img src="https://img.shields.io/github/stars/manjavacas/typslides" alt="GitHub repo stars">
-</p>
+# contenuti di questa repo
+ho scaricato più o meno la qualsiasi qua dentro, è tipo un docker dei poveri ma per compilare un pdf, la cartella contiene
+- file della presentazione (`presentation.typ`)
+- script `run` che fa il setup di tutto (se serve) poi runna typst
+- cartella asset con
+  - il template usato per fare la presentazione (`assets > templates > typslides`)
+  - tutti i font utilizzati per la presentazione (`assets > fonts`), in particolare
+    - fira sans (quello default del template `typslides`)
+    - jetbrains mono (per stile)
+    - comic sans (per ridere)
+  - il file eseguibile per runnare `typst` (`assets > tools > typst` (per linux), `assets > tools > typst.exe` (per windows))
+    gli eseguibili di typst dal github sono tutti compilati staticamente quindi l'eseguibile da solo basta e avanza.
+  - il file eseguibile dell'interpreter per runnare lo script di setup/lancio
+- license di qualsiasi cosa
 
-<p align="justify">
-<strong>Typslides</strong> is a minimalist package for creating presentations with <a href="https://typst.app/">typst</a>, designed to offer a simple and fast user experience. Structure your content with different slide styles and aesthetic elements. With a clear and concise syntax, Typslides makes it easy to create elegant and well-organized presentations.
-</p>
+# per editare il documento
+penso vscode sappia gestire i file `.typ` abbastanza tranquillamente
+se non out of the box sicuro c'è un plugin che puoi scaricarti per farlo funzionare
 
-<p align="justify">
-Default <strong>themes</strong>:
-</p>
+# come compilare il documento
+per compilare sto documento se usa [typst](https://typst.app/), non si fa niente di troppo strano probabilmente puoi anche  prenderlo e schiaffarlo sulla web app, ma per come si è impostato qua abbiamo uno script `run` per gestirla un po' più tranquillamente
 
-<p align="center">
-🔵 <strong>bluey</strong>   🔴 <strong>reddy</strong>   🟢 <strong>greeny</strong>   🟡 <strong>yelly</strong>   🟣 <strong>purply</strong>   🔵 <strong>dusky</strong>   ⚫ <strong>darky</strong>
-</p>
+## da webapp
+non so usare programmi web, vedi te se vuoi fare dalla webapp
 
-# Quickstart
+## da script `run`
+lo script `run` è diviso in due parti
 
-This is a simple usage example:
+- una prima scarica tutti gli asset che possono servire, purtroppo per come l'ho scritta questa parte dello script per ora funziona solo da posix (linux o mac), può funzionare (in parte) da windows se ti installi [la versione windows delle coreutil posix](https://github.com/microsoft/coreutils) ma per ora non l'ho testata, per evitare troppe beghe al momento lasciato nella repo tutta la roba che si è scaricato lo script così quando lo rirunni quella parte viene saltata e l'interpreter non si ammazza in medias res per "manca il comando `ls`"
 
-```typst
-#import "@preview/typslides:1.3.4": *
+- una seconda parta runna l'eseguibile `typst` (vendorizzato all'interno della repo insieme a tutto il resto, faceva più comodo) e gli passa il file della presentazione, questa parte ti produce in output il pdf abbastanza in fretta 
 
-// Project configuration
-#show: typslides.with(
-  ratio: "16-9",
-  theme: "bluey",
-  font: "Fira Sans",
-  font-size: 20pt,
-  link-style: "color",
-  show-progress: true,
-)
-
-// The front slide is the first slide of your presentation
-#front-slide(
-  title: "This is a sample presentation",
-  subtitle: [Using _typslides_],
-  authors: "A. Manjavacas",
-  info: [#link("https://github.com/manjavacas/typslides")],
-)
-
-// Custom outline
-#table-of-contents()
-
-// Title slides create new sections
-#title-slide[
-  This is a _Title slide_
-]
-
-// A simple slide
-#slide[
-  - This is a simple `slide` with no title.
-  - #stress("Bold and coloured") text by using `#stress(text)`.
-  - Sample link: #link("typst.app").
-    - Link styling using `link-style`: `"color"`, `"underline"`, `"both"`
-  - Font selection using `font: "Fira Sans"`, `size: 21pt`.
-
-  #framed[This text has been written using `#framed(text)`. The background color of the box is customisable.]
-
-  #framed(title: "Frame with title")[This text has been written using `#framed(title:"Frame with title")[text]`.]
-]
-
-// Focus slide
-#focus-slide[
-  This is an auto-resized _focus slide_.
-]
-
-// Blank slide
-#blank-slide[
-  - This is a `#blank-slide`.
-
-  - Available #stress[themes]#footnote[Use them as *color* functions! e.g., `#reddy("your text")`]:
-
-  #framed(back-color: white)[
-    #bluey("bluey"), #reddy("reddy"), #greeny("greeny"), #yelly("yelly"), #purply("purply"), #dusky("dusky"), darky.
-  ]
-
-  // #show: typslides.with(
-  //   ratio: "16-9",
-  //   theme: "bluey",
-  //   ...
-  // )
-  
-
-  - Or just use *your own theme color*:
-    - `theme: rgb("30500B")`
-]
-
-// Slide with title
-#slide(title: "Outlined slide", outlined: true)[
-  - Check out the *progress bar* at the bottom of the slide.
-
-    #h(1cm) `show-progress: true`
-
-  - Outline slides with `outlined: true`.
-
-  #grayed([This is a `#grayed` text. Useful for equations.])
-  #grayed($ P_t = alpha - 1 / (sqrt(x) + f(y)) $)
-
-]
-
-// Columns
-#slide(title: "Columns")[
-
-  #cols(columns: (2fr, 1fr, 2fr), gutter: 2em)[
-    #grayed[Columns can be included using `#cols[...][...]`]
-  ][
-    #grayed[And this is]
-  ][
-    #grayed[an example.]
-  ]
-
-  - Custom spacing: `#cols(columns: (2fr, 1fr, 2fr), gutter: 2em)[...]`
-
-  - Sample references: @typst, @typslides.
-    - Add a #stress[bibliography slide]...
-
-    1. `#let bib = bibliography("you_bibliography_file.bib")`
-    2. `#bibliography-slide(bib)`
-]
-
-// Bibliography
-#let bib = bibliography("bibliography.bib")
-#bibliography-slide(bib)
-
+### per runnare lo script
+- da posix (linux o mac), puoi fare
+```sh
+./assets/tools/shsl ./run
+```
+o anche semplicemente
+```sh
+./run
 ```
 
-# Sample slides
-
-<kbd><img src="img/slide-1.svg" alt="Slide 1" width="300"></kbd> <kbd><img src="img/slide-2.svg" alt="Slide 2" width="300"></kbd> <kbd><img src="img/slide-3.svg" alt="Slide 3" width="300"></kbd> <kbd><img src="img/slide-4.svg" alt="Slide 4" width="300"></kbd> <kbd><img src="img/slide-5.svg" alt="Slide 5" width="300"></kbd> <kbd><img src="img/slide-6.svg" alt="Slide 6" width="300"></kbd> <kbd><img src="img/slide-7.svg" alt="Slide 7" width="300"></kbd> <kbd><img src="img/slide-8.svg" alt="Slide 8" width="300"></kbd> <kbd><img src="img/slide-9.svg" alt="Slide 9" width="300"></kbd>
+- da windows, puoi fare
+```sh
+.\assets\tools\shsl.exe .\run
+```
+o anche solo 
+```sh
+run
+```
+se girare `run` e basta non funziona ho aggiunto per sicurezza un file `.bat` che esegue `.\assets\tools\shsl.exe .\run`, per runnare il file `.bat` basta fa
+```sh
+run.bat
+```
+> i comandi per runnare lo script vanno eseguiti nella cartella dove sta lo script, altrimenti la shell non lo trova
