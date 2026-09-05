@@ -17,104 +17,98 @@
 
 #table-of-contents()
 
-#focus-slide[
-  L Systems
+#focus-slide[L Systems]
 
-  (scusa rod se sto facendo il prototipo in italiano)
+#slide(title:"General Anatomy of an L-System")[
+To draw a tree using L-systems we need to have all components of an L-system first, these are
+- An alphabet of *symbols* which will be used as instructions for drawing the tree #linebreak()
+  these symbols may be
+  - *parameterized*: an instruction character accompanied by a vector of parameters (a vector $in bb(R)^n$ for some $n in bb(N)^*$)
+  - *non parameterized*: an instruction character with no accompanying parameters
+- *Rewrite rules* which will be used to iteratively process a string made out of these symbols, these rewrite rules may be
+  - *deterministic* or *stochastic* (a stochastic rule applies a rule sampled from a distribution of deterministic rules)
+  - *context free* (known as *0L-systems*) or *context dependant* (such as *2L-systems*)
+- A *turtle graphics* system, which will take the processed symbol string and use it as instructions to go and draw the tree
 ]
 
-#slide(title:"Anatomia di un L-System")[
-
-Per disegnare un albero tramite L-system serve avere
-- Un alfabeto di *simboli* da interpretare come istruzioni per disegnare l'albero
-  #linebreak()
-  questi simboli possono essere
-  - *non parametrici*: una "lettera e basta"
-  - *parametrici* una "lettera" accompagnata da un vettore di parametri ($in bb(R)^n$ per un qualche $bb(N)$)
-- Regole di *riscrittura* per stringhe fatte di questi simboli #linebreak()
-  queste regole possono essere
-  - *deterministiche* o *stocastiche*
-  - *context free* (cosiddetti _0L-systems_) o context dependant(quale ad esempio un _2L-system_)
-- Un sistema di *turtle graphics* a cui passare una stringa di questi simboli/istruzioni dopo che è passata tot volte per le regole di riscrittura
+#slide(title:"Our L-System")[
+For this lab project we have implemented a *stochastic, parametric, bracketed 0L-System*
+- *0L-System*: means the rewrite rules (sometimes called *production rules*) are *context free*, this means that when determining how to  replace a symbol, only that symbol is considered, and its context (eventual nearby symbols) is not taken into consideration
+- *Stochastic*: the production rule we apply when rewriting a symbol may be chosen in a deterministic manner or sampled from a distribution of predefined productions
+- *Parametric*: The strings our turtle and productions act on are composed of symbols which may include an accompanying vector of parameter
+- *Bracketed*: The system has a state stack, which allows for greater expressivity when defining branching structures
 ]
 
+#focus-slide[Turtle Graphics]
 
-#slide(title:"Cosa si è fatto noi?")[
-Noi si è realizzato uno *stochastic parametric OL System*
-- *OL System*: Le regole di riscrittura (o _produzioni_, in gergo informatica teorica) sono _context free_, sarebbe a dire, determiniamo come sostituire un simbolo guardando solo quel simbolo, ignorando eventuali simboli che questo possa avere a destra o a sinistra all'interno della stringa
-- *Stochastic*: Durante una riscrittura, la produzione che andiamo ad applicare al simbolo può essere fissa o può venire campionata da una qualche distribuzione di produzioni.
-- *Parametric*: I simboli su cui vanno ad agire queste produzioni sono coppie lettera - vettore di parametri
+#slide(title:"Traditional Turtle Graphics Systems")[
+Discussion of our symbol alphabet, and, by extension, of the instruction strings we act on, are best understood with the context of the system these aphorementioned instructions act upon.
+
+Traditionally, a *turtle graphics* system is comprised of
+- A turtle *position* ($in bb(R)^2$) and an orientation/angle the turtle is at
+- A "*pen*", which may be *up* or *down* to draw or not draw a line where the turtle moves
+Such a system is controlled by a rather reduced instruction set, usually
+- Go *forward* for a given length
+- Turn *left* or *right* by a given angle
+- *Raise* pen if pen is not up, or *lower* pen if pen is not down
 ]
 
-#focus-slide[
-  Turtle Graphics
+#slide(title:"Instructions for our Turtle Graphics System")[
+The turtle graphics system presented in the book differs from traditional turtle graphics in a number of ways
+- It acts in *3D space*, allowing for rotations of *pitch*, *yaw*, and *roll*, instead of simply left or right
+- It may *save* a previous state, and *restore* a previously saved state
+- It has a *thickness* and a *color* table to determine how the "pen" draws, indices in these tables are part of the state and may be incremented or decremented
+- It does not have a notion of pen up/down, it instead encodes "move leaving a mark" and "move without leaving a mark" as *two different instructions*
+- It may enter or leave a so called "*polygon mode*", where
+  - while in polygon mode all positions at which the turtle stops after an instruction are saved in an internal buffer
+  - upon exiting polygon mode a polygon is between all these positions
 ]
 
-#slide(title:"Turtle Graphics Tradizionale")[
-Per parlare della parte di riscrittura serve parlare dei simboli che compongono le stringhe di istruzioni, e per parlare di quei simboli bisogna contestualizzare su cosa vanno ad agire questi simboli.
-
-Turtle graphics tradizionalmente composto da
-- una posizione in $bb(R)^2$ e un angolo
-- una "penna" che si può alzare o abbassare per iniziare/smettere di disegnare
-Un tale sistema prevende un set relativamente ridotto di istruzioni, solitamente
-- vai avanti/dietro una certa lunghezza 
-- gira a destra/sinistra di un certo angolo
-- abbassa o alzall la "penna" dal "foglio"
+#slide(title:"Structure of our Turtle Graphics System")[
+These are the instructions the turtle needed to implement as per the book, to create a system capible of executing these instructions our turtle includes
+- A *position* in $bb(R)^3$, and an *orientation* represented using *3 unit vectors*, describing the $H$ (heading), $L$ (left), and $U$ up, directions of the turtle, arranged as columns of a $H L U$ matrix
+- "*color*" and *thickness* tables, passed at construction time, and *indices* within those table, as state variables
+  - to better work with our shader we have opted to use a *texcoords table* instead of a color table, color table behaviour is *emulated* using increasing texcoords and a vertical gradient texture
+- a *stack* of previously saved states, a *frame* within this stack includes position, orientation, and indices within the color and thickess tables
 ]
 
-#slide(title:"Istruzioni Nostra Tartaruga")[
-Il sistema presentato nel libro prevede però ulteriori istruzioni, quali
-- spostarsi in 3d e girare pitch, yaw, e roll
-- salva stato precedente/ripristina un stato precedente salvato
-- assottiglia/inspessisci il tratto (avanza l'indice in una tabella di spessori) (tronco spesso, rametti sottili)
-- passa a un colore più scuro/più chiaro (avanza l'indice in una tabella di colori) (tronco marrone scuro, rametti verde chiaro)
-- non è presente il concetto di una penna alzata/abbassata, andare avanti con o senza il "tracciare una riga" sono due istruzioni diverse
-- `{` e `}` rinchiudono un contesto, tipo un `with` di python
-  - `{` qua inizia un poligiono, fino alla fine del poligono segnati tutti i punti da cui passi
-  - `}` prendi tutti i punti che ti sei segnato e facci un poligono
-]  
-#slide(title:"Struttura Nostra Tartaruga")[
-Per implementare un sistema che potesse eseguire queste istruzioni la nostra tartaruga ha
-- posizione $in bb(R)^3$, angolo rappresentato come matrice $3 times 3$ HLU (colonne formano vettori Heading, Left, Right)
-- una tabella di spessori e un indice in questa tabella
-- tabella di colori, sempre con indice, realizzata però come tabella di texture coordinate
-  - facilita la fase di texturing il lavoro con lo shader (non bisogna gestire vertex color)
-  - comportamento "color table" simulato con texture coordinate crescenti e una texture gradiente
-- uno stack di stati precedentemente salvati, salvare fa push ripristinare fa pop
-  - lo stato include anche gli indici nelle tabelle di spessore e texcoord
-]
-#slide(title:"Struttura Nostra Tartaruga")[
-- flag per vedere se siamo in un "blocco" `{` ... `}` e un buffer di vertici dove ci segnamo il poligono corrente
-  - buffer dove vengono salvati i vertici del poligono percorso durante il blocco `{` ... `}`
+#slide(title:"Structure of our Turtle Graphics System")[
+Furthermore, to implement the *polygon mode* described in the book, the turtle includes
+- A *flag* controlling wether we are in polygon mode or not
+- A resizeable buffer where all visited positions are saved whilst moving around in polygon mode
 
-Inoltre per motivi di efficienza invece di disegnare l'albero la turtle crea un modello di albero, che poi passiamo subito alla gpu e non dobbiamo rieseguire la tartaruga a ogni frame in cui si vede l'albero, per creare il modello utilizziamo
-- un buffer (espandibile) di vertex coordinate
-- un buffer (espandibile) di texture coordinate
-
-(qui parti con pippone sul pattern builder)
-(quando incontri un'istruzione di disengare roba aggiungi la roba al buffer, poi alla fine fai get e hai tutta la roba che hai aggiunto nelle varie chiamate)
+As a performance consideration, instead of *drawing* the tree at *each frame*, the turtle graphics system is instead tasked with *creating the tree mesh* only *once*. #linebreak()
+To produce this tree mesh the turtle includes
+- a resizeable buffer of *vertex coords*
+- a resizeable buffer of *texture coords*
+to which it adds all vertices (branches or leaves) it is tasked with drawing, and which gets turned into a mesh once the mesh creation is finished, following a *builder/director design pattern*.
 ]
 
-#slide(title:"Simboli")[
-- un simbolo è una coppia carattere + vettore di numeri che rappresenta un'istruzione per il sistema di turtle graphics descritto sopra, l'alfabeto di simboli accettato dalla nostra turtle, ripreso dal libro, è
-- `F|f` + `stride`: avanza di una lunghezza pari a `stride` lungoo l'angolo di heading, lasciando (`F`) o non lasciando (`f`) dietro una traccia di questo avanzamento
-- `&|.|.|.|.|.` + `angolo`: ruota di +(`sdd`) o -(`sss`) angolo lungo l'asse H(`...`), L(`...`), o U(`...`)
-- `'!` (senza parametri): incrementa indice in...
-- `[|]` (senza parametri) : salva lo stato corrente `[` o ripristina lo stato precedentemente salvato `]`
-- `{|}` (senza parametri) : inizia `{` a diesgnare un poligono, o finisci di disengare un poligono `}`
+#focus-slide[Symbols and Rewrite Rules]
+
+#slide(title:"Symbols")[
+Symbols in an instruction string may be either special symbols accepted by the turtle, or intermediate symbols, used by the rewrite step, but ignored by the turtle. #linebreak()
+The symbols accepted by the turtle are
+- `F` or `f`, with one parameter, indicating a *stride*#linebreak()
+  intepreted as: go forward by a length `stride`, leaving (`F`) or not leaving (`f`) a mark.
+- `&`, `^`, `+`, `-`, `/`, or `\`, with one parameter indicating *angle*#linebreak()
+  interpreted as: rotate by an angle `angle`, clockwise (`^`, `-`, `/`) or counter clockwise (`&`, `+`, `\`), around the $H$ (`/`, `\`), $L$ (`&`, `^`), or $U$ (`+`, `-`) axis
+- `!`, or `'`, with no parameters#linebreak()
+  interpreted as: increment the index in the thickess (`!`) or color (`'`) table
+- `[`, or `]`, with no parameters#linebreak()
+  interpreted as: push state to stack (`[`) or restore last state from stack (`]`)
+- `{`, or `}`, with no parameters#linebreak()
+  interpreted as: enter (`{`) or leave (`}`) polygon mode
 ]
 
-#slide(title:"Riscritture")[
-  roba
+#slide(title:"Rewrite Rules")[
+  - stochastic
+  - deterministic
+  - dio
+  - boia
 ]
 
-#slide(title:"Inoltre Json")[
-  roba
-]
-
-#focus-slide[
-  Terrain
-]
+#focus-slide[Terrain]
 
 #slide(title: "Terrain")[
   - Procedural terrain generation
@@ -139,9 +133,7 @@ Inoltre per motivi di efficienza invece di disegnare l'albero la turtle crea un 
   - Terrain texture has diffrent textures depending on the height
 ]
 
-#focus-slide[
-  Texture e Shader
-]
+#focus-slide[Texture e Shader]
 
 #slide(title: "Texturing")[
   - Readapted a PBR shaders to use textures and lighting
@@ -159,9 +151,7 @@ Inoltre per motivi di efficienza invece di disegnare l'albero la turtle crea un 
     - Can manage more light by the shaders
 ]
 
-#focus-slide[
-  Player
-]
+#focus-slide[Player]
 
 #slide(title: "Player")[
   - Class that manage the camera and player controls
