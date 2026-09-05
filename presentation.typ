@@ -102,10 +102,15 @@ The symbols accepted by the turtle are
 ]
 
 #slide(title:"Rewrite Rules")[
-  - stochastic
-  - deterministic
-  - dio
-  - boia
+The rewriting engine follows the following logic 
+- A rewritten string is obtained by concatenating the rewriting of all its symbols (flatmap), symbols for which no matching rewrite is found are rewritten into themselves
+- A production is an aribrary function of a symbol's parameter vector, the production a symbol is passed to is determined only by the letter/instruction in the symbol
+]
+
+#slide(title:"Stochastic and Deterministic Rewrite Rules")[
+As stated above our rewrite system supports both deterministic and stochastic productions
+- A deterministic production is a (deterministic) function of the symbol's vector parameters 
+- A stochastic production (by the book) is a finite set of deterministic productions, each with a probability of being chosen, a stochastic production is applied by sampling a deterministic production from this set and applying it
 ]
 
 #focus-slide[Terrain]
